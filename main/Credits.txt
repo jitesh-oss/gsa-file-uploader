@@ -1,0 +1,5 @@
+Bootstrap https://getbootstrap.com/
+jQuery
+Font Awesome
+DropzoneJS
+Montserrat
