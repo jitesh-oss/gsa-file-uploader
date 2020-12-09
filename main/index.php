@@ -1,99 +1,79 @@
-    <?php
-    $css = plugins_url( 'assets/css', __FILE__ );
-    $js = plugins_url( 'assets/js', __FILE__ );
-    $fonts = plugins_url( 'assets/fonts', __FILE__ );
-    $fileupload = plugins_url( 'file-upload.php', __FILE__ );
-    ?>
-    <!-- Favicons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="https://onyxdev.net/files/assets/images/favicons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" href="https://onyxdev.net/files/assets/images/favicons/favicon-32x32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="https://onyxdev.net/files/assets/images/favicons/favicon-16x16.png" sizes="16x16">
-    <link rel="manifest" href="https://onyxdev.net/files/assets/images/favicons/manifest.json">
-    <link rel="mask-icon" href="https://onyxdev.net/files/assets/images/favicons/safari-pinned-tab.svg" color="#34b2a7">
-    <link rel="shortcut icon" href="https://onyxdev.net/files/assets/images/favicons/favicon.ico">
-    <meta name="msapplication-config" content="https://onyxdev.net/files/assets/images/favicons/browserconfig.xml">
-    <meta name="theme-color" content="#34b2a7">
+<?php
+$js = plugins_url( 'assets/js', __FILE__ );
+$uploadfile = plugins_url( 'upload.php', __FILE__ );
+?>
+<script type="text/javascript" src="<?= $js; ?>/plupload.full.min.js"></script>
 
-	<!-- Fonts -->
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,500,600,700|Open+Sans" rel="stylesheet">
+<p>Browse to GSA files</p>
+
+<div id="filelist">Your browser doesn't have Flash, Silverlight or HTML5 support.</div>
+<br />
+
+<div id="container">
+    <a id="pickfiles" href="javascript:;"><button type="button" class="btn btn-default">Select Files</button></a> 
+    <a id="uploadfiles" href="javascript:;"><button type="button" class="btn btn-primary">Upload</button></a>
+</div>
+
+<br />
+<pre id="console"></pre>
+
+
+<script type="text/javascript">
+// Custom example logic
+var upload_file = '<?php echo $uploadfile; ?>';
+var uploader = new plupload.Uploader({
+	runtimes : 'html5,flash,silverlight,html4',
+	browse_button : 'pickfiles', // you can pass an id...
+	container: document.getElementById('container'), // ... or DOM Element itself
+	url : upload_file,
+	flash_swf_url : '<?= $js; ?>/Moxie.swf',
+	silverlight_xap_url : '<?= $js; ?>/Moxie.xap',
 	
-	<!-- Libraries/Plugins -->
-	<link id="bootstrap-css" href="<?php echo $css; ?>/bootstrap.min.css" rel="stylesheet">
-	<link id="dropzone-css" href="<?php echo $css; ?>/dropzone.css" rel="stylesheet">
+	filters : {
+		max_file_size : '5000mb',
+		mime_types: [
+			{title : "Text Files", extensions : "txt"}
+		]
+	},
 
-	<!-- Icons Library -->
-	<link id="font-awesome-css" href="<?php echo $css; ?>/font-awesome.min.css" rel="stylesheet">
+	init: {
+		PostInit: function() {
+			document.getElementById('filelist').innerHTML = '';
 
-	<!-- Main CSS -->
-	<link id="onyx-css" href="<?php echo $css; ?>/style.css" rel="stylesheet">
+			document.getElementById('uploadfiles').onclick = function() {
+				uploader.start();
+				return false;
+			};
+		},
 
-	<!-- Wrapper -->
-	<div class="wrapper">
+		FilesAdded: function(up, files) {
+			plupload.each(files, function(file) {
+				document.getElementById('filelist').innerHTML += '<div id="' + file.id + '">' + file.name + ' (' + plupload.formatSize(file.size) + ') <b></b></div>';
+			});
+		},
 
-		<section class="container-fluid inner-page">
+		UploadProgress: function(up, file) {
+			document.getElementById(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+		},
 
-			<div class="row">
+		FileUploaded: function(up, file, data){
+			console.log(data.response);
+			// var obj = JSON.parse(data.response); 
+			if(data.response == 'Connection Failure'){
+				document.getElementById('console').appendChild(document.createTextNode("\nError #" + data.response));
+			}
+			else{
+				var obj = JSON.parse(data.response); 
+				document.getElementById('console').appendChild(document.createTextNode("\nMessage #" + obj.result +"\nFilename #"+obj.filename));
+			}
+		},
 
-				<div class="col-xl-6 offset-xl-3 col-lg-6 offset-lg-3 col-md-12 full-dark-bg">
+		Error: function(up, err) {
+			document.getElementById('console').appendChild(document.createTextNode("\nError #" + err.code + ": " + err.message));
+		}
+	}
+});
 
-					<!-- Files section -->
-					<h4 class="section-sub-title"><span>Upload</span> Your Files</h4>
+uploader.init();
 
-					<form action="<?php echo $fileupload; ?>" class="dropzone files-container">
-						<div class="fallback">
-							<input name="file" type="file" multiple />
-						</div>
-					</form>
-
-					<!-- Notes -->
-					<span>Only JPG, PNG, PDF, DOC (Word), XLS (Excel), PPT, ODT and RTF files types are supported.</span>
-					<span>Maximum file size is 25MB.</span>
-
-					<!-- Uploaded files section -->
-					<h4 class="section-sub-title"><span>Uploaded</span> Files (<span class="uploaded-files-count">0</span>)</h4>
-					<span class="no-files-uploaded">No files uploaded yet.</span>
-
-					<!-- Preview collection of uploaded documents -->
-					<div class="preview-container dz-preview uploaded-files">
-						<div id="previews">
-							<div id="onyx-dropzone-template">
-								<div class="onyx-dropzone-info">
-									<div class="thumb-container">
-										<img data-dz-thumbnail />
-									</div>
-									<div class="details">
-										<div>
-											<span data-dz-name></span> <span data-dz-size></span>
-										</div>
-										<div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div>
-										<div class="dz-error-message"><span data-dz-errormessage></span></div>
-										<div class="actions">
-											<a href="#!" data-dz-remove><i class="fa fa-times"></i></a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Warnings -->
-					<div id="warnings">
-						<span>Warnings will go here!</span>
-					</div>
-
-				</div>
-			</div><!-- /End row -->
-
-		</section>
-
-	</div>
-	<!-- /Wrapper -->
-
-	<!-- JQuery -->
-	<script src="<?php echo $js; ?>/jquery-1.10.2.min.js"></script>
-
-	<!-- Dropzone JS -->
-	<script src="<?php echo $js; ?>/dropzone.min.js"></script>
-
-	<!-- Main JS file -->
-	<script src="<?php echo $js; ?>/scripts.js"></script>
+</script>
