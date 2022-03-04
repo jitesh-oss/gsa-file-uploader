@@ -163,7 +163,7 @@ function login($email, $pass){
  }
 
 function callAPI($method, $url, $data, $fileName){
-	$key = login('test@test.com','123'); 
+	$key = login('test@test.com','00000'); 
     $curl = curl_init();
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 0); 
     curl_setopt($ch, CURLOPT_TIMEOUT, 40000);
