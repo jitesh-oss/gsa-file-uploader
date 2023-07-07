@@ -1,4 +1,4 @@
-=== GSA File Upload ===
+# GSA File Upload Plugin in PHP for wordpress
 Contributors: http://www.sangergenomics.com
 Donate link: http://www.sangergenomics.com
 Tags: comments, spam
